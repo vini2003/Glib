@@ -19,7 +19,7 @@ public class WDynamicText extends WWidget {
 	protected int offsetPos = 0;
 	protected int fooY = 0;
 
-	protected boolean isEditable;
+	protected boolean isEditable = true;
 
 	public WDynamicText(WAnchor anchor, int positionX, int positionY, int positionZ, double sizeX, double sizeY, WPanel linkedPanel) {
 		setLinkedPanel(linkedPanel);
