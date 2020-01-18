@@ -67,6 +67,11 @@ public class WDynamicText extends WWidget {
 		return selRightPos != - 1 && selLeftPos != - 1;
 	}
 
+	public String getText()
+	{
+		return text;
+	}
+
 	public boolean isEditable() {
 		return isEditable;
 	}
