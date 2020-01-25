@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface WCollection {
 	List<WWidget> getWidgets();
-	List<WWidget> getWidgetsDeep();
+	List<WWidget> getAllWidgets();
 }

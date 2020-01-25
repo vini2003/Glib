@@ -71,10 +71,10 @@ public class WTabHolder extends WWidget implements WClient, WCollection {
 	}
 
 	@Override
-	public List<WWidget> getWidgetsDeep() {
+	public List<WWidget> getAllWidgets() {
 		List<WWidget> widgets = new LinkedList<>();
 		for (int i : tabs.keySet()) {
-			widgets.addAll(tabs.get(i).getWidgetsDeep());
+			widgets.addAll(tabs.get(i).getAllWidgets());
 		}
 		return widgets;
 	}
@@ -150,11 +150,11 @@ public class WTabHolder extends WWidget implements WClient, WCollection {
 		}
 
 		@Override
-		public List<WWidget> getWidgetsDeep() {
+		public List<WWidget> getAllWidgets() {
 			List<WWidget> deepList = new ArrayList<>(widgets);
 			for (WWidget widgetA : widgets) {
 				if (widgetA instanceof WCollection) {
-					deepList.addAll(((WCollection) widgetA).getWidgetsDeep());
+					deepList.addAll(((WCollection) widgetA).getAllWidgets());
 				}
 			}
 			return deepList;

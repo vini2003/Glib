@@ -33,13 +33,13 @@ public class WInterfaceHolder {
 		return widgets;
 	}
 
-	public List<WWidget> getNonConcurrentDeep() {
+	public List<WWidget> getAllWidgets() {
 		List<WWidget> nonConcurrentList = new ArrayList<>();
 		for (WInterface myInterface : getInterfaces()) {
 			for (WWidget widgetA : myInterface.getWidgets()) {
 				nonConcurrentList.add(widgetA);
 				if (widgetA instanceof WCollection) {
-					nonConcurrentList.addAll(((WCollection) widgetA).getWidgetsDeep());
+					nonConcurrentList.addAll(((WCollection) widgetA).getAllWidgets());
 				}
 			}
 		}
@@ -47,7 +47,7 @@ public class WInterfaceHolder {
 	}
 
 	public boolean onMouseClicked(int mouseX, int mouseY, int mouseButton) {
-		for (WWidget widget : getNonConcurrentDeep()) {
+		for (WWidget widget : getAllWidgets()) {
 			widget.onMouseClicked(mouseX, mouseY, mouseButton);
 		}
 		return false;
@@ -55,7 +55,7 @@ public class WInterfaceHolder {
 
 
 	public boolean onMouseReleased(int mouseX, int mouseY, int mouseButton) {
-		for (WWidget widget : getNonConcurrentDeep()) {
+		for (WWidget widget : getAllWidgets()) {
 			widget.onMouseReleased(mouseX, mouseY, mouseButton);
 		}
 		return false;
@@ -63,7 +63,7 @@ public class WInterfaceHolder {
 
 
 	public boolean onMouseDragged(int mouseX, int mouseY, int mouseButton, int deltaX, int deltaY) {
-		for (WWidget widget : getNonConcurrentDeep()) {
+		for (WWidget widget : getAllWidgets()) {
 			widget.onMouseDragged(mouseX, mouseY, mouseButton, deltaX, deltaY);
 		}
 		return false;
@@ -71,14 +71,14 @@ public class WInterfaceHolder {
 
 
 	public boolean onMouseScrolled(int mouseX, int mouseY, double deltaY) {
-		for (WWidget widget : getNonConcurrentDeep()) {
+		for (WWidget widget : getAllWidgets()) {
 			widget.onMouseScrolled(mouseX, mouseY, deltaY);
 		}
 		return false;
 	}
 
 	public void mouseMoved(int mouseX, int mouseY) {
-		for (WWidget widget : getNonConcurrentDeep()) {
+		for (WWidget widget : getAllWidgets()) {
 			widget.scanFocus(mouseX, mouseY);
 			widget.onMouseMoved(mouseX, mouseY);
 		}
@@ -86,7 +86,7 @@ public class WInterfaceHolder {
 
 
 	public boolean onKeyReleased(int character, int keyCode, int keyModifier) {
-		for (WWidget widget : getNonConcurrentDeep()) {
+		for (WWidget widget : getAllWidgets()) {
 			widget.onKeyReleased(keyCode);
 			widget.onKeyReleased(keyCode);
 		}
@@ -94,7 +94,7 @@ public class WInterfaceHolder {
 	}
 
 	public boolean keyPressed(int character, int keyCode, int keyModifier) {
-		for (WWidget widget : getNonConcurrentDeep()) {
+		for (WWidget widget : getAllWidgets()) {
 			widget.onKeyPressed(character, keyCode, keyModifier);
 		}
 		return false;
@@ -102,20 +102,20 @@ public class WInterfaceHolder {
 
 
 	public boolean onCharTyped(char character, int keyCode) {
-		for (WWidget widget : getNonConcurrentDeep()) {
+		for (WWidget widget : getAllWidgets()) {
 			widget.onCharTyped(character);
 		}
 		return false;
 	}
 
 	public void drawMouseoverTooltip(int mouseX, int mouseY) {
-		for (WWidget widget : getNonConcurrentDeep()) {
+		for (WWidget widget : getAllWidgets()) {
 			widget.onDrawTooltip();
 		}
 	}
 
 	public void tick() {
-		for (WWidget widget : getNonConcurrentDeep()) {
+		for (WWidget widget : getAllWidgets()) {
 			widget.tick();
 		}
 	}
