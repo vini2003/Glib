@@ -66,6 +66,18 @@ public class WDropdown extends WWidget implements WClient, WCollection {
 	}
 
 	@Override
+	public List<WWidget> getWidgetsDeep() {
+		List<WWidget> widgets = new ArrayList<>();
+		for (List<WWidget> widgetA : getDropdownWidgets()) {
+			widgets.addAll(widgetA);
+			if (widgetA instanceof WCollection) {
+				widgets.addAll(((WCollection) widgetA).getWidgetsDeep());
+			}
+		}
+		return widgets;
+	}
+
+	@Override
 	public void onMouseClicked(int mouseX, int mouseY, int mouseButton) {
 		if (getFocus() && mouseButton == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
 			setState(!getState());
