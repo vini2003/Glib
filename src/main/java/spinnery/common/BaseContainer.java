@@ -196,6 +196,10 @@ public class BaseContainer extends Container {
 
 		WSlot slotA = slotT;
 
+		if(slotA.isLocked()) {
+			return;
+		}
+
 		ItemStack stackA = slotA.getStack().copy();
 		ItemStack stackB = player.inventory.getCursorStack().copy();
 
@@ -246,6 +250,9 @@ public class BaseContainer extends Container {
 				for (WAbstractWidget widget : serverInterface.getAllWidgets()) {
 					if (widget instanceof WSlot && ((WSlot) widget).getLinkedInventory() != slotA.getLinkedInventory()) {
 						WSlot slotB = ((WSlot) widget);
+
+						if (slotB.isLocked()) continue;
+
 						ItemStack stackC = slotB.getStack();
 						stackA = slotA.getStack();
 
