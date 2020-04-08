@@ -10,8 +10,8 @@ public class InventoryUtilities {
 	 * @return Tag from inventory
 	 */
 	public static <T extends Inventory> CompoundTag write(T inventory, CompoundTag tag) {
-		for (int i = 0; i < inventory.getInvSize(); ++i) {
-			tag.put(String.valueOf(i), StackUtilities.write(inventory.getInvStack(i)));
+		for (int i = 0; i < inventory.size(); ++i) {
+			tag.put(String.valueOf(i), StackUtilities.write(inventory.getStack(i)));
 		}
 
 		return tag;
@@ -23,8 +23,8 @@ public class InventoryUtilities {
 	 * @return Inventory from tag
 	 */
 	public static <T extends Inventory> T read(T inventory, CompoundTag tag) {
-		for (int i = 0; i < inventory.getInvSize(); ++i) {
-			inventory.setInvStack(i, StackUtilities.read((CompoundTag) tag.get(String.valueOf(i))));
+		for (int i = 0; i < inventory.size(); ++i) {
+			inventory.setStack(i, StackUtilities.read((CompoundTag) tag.get(String.valueOf(i))));
 		}
 
 		return inventory;

@@ -7,8 +7,8 @@ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.PacketByteBuf;
 import spinnery.common.BaseScreenHandler;
 import spinnery.util.StackUtilities;
 import spinnery.widget.WAbstractWidget;
@@ -222,11 +222,11 @@ public class NetworkRegistry {
 						if (packetContext.getPlayer().currentScreenHandler instanceof BaseScreenHandler && packetContext.getPlayer().currentScreenHandler.syncId == syncId) {
 							BaseScreenHandler container = (BaseScreenHandler) packetContext.getPlayer().currentScreenHandler;
 
-							container.getInventory(inventoryNumber).setInvStack(slotNumber, stack);
+							container.getInventory(inventoryNumber).setStack(slotNumber, stack);
 
 							for (WAbstractWidget widget : container.getInterface().getAllWidgets()) {
 								if (widget instanceof WSlot && ((WSlot) widget).getInventoryNumber() == inventoryNumber && ((WSlot) widget).getSlotNumber() == slotNumber) {
-									((WSlot) widget).setStack(container.getInventory(inventoryNumber).getInvStack(slotNumber));
+									((WSlot) widget).setStack(container.getInventory(inventoryNumber).getStack(slotNumber));
 								}
 							}
 						}
