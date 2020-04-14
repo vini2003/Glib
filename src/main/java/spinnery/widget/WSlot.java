@@ -14,26 +14,19 @@ import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.Level;
 import spinnery.Spinnery;
 import spinnery.client.BaseRenderer;
-import spinnery.common.BaseScreenHandler;
+import spinnery.common.BaseContainer;
 import spinnery.widget.api.Action;
 import spinnery.widget.api.Position;
 import spinnery.widget.api.Size;
 import spinnery.widget.api.WModifiableCollection;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import static net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE;
-import static spinnery.registry.NetworkRegistry.SLOT_CLICK_PACKET;
-import static spinnery.registry.NetworkRegistry.SLOT_DRAG_PACKET;
-import static spinnery.registry.NetworkRegistry.createSlotClickPacket;
-import static spinnery.registry.NetworkRegistry.createSlotDragPacket;
-import static spinnery.util.MouseUtilities.nanoDelay;
-import static spinnery.util.MouseUtilities.nanoInterval;
-import static spinnery.util.MouseUtilities.nanoUpdate;
-import static spinnery.widget.api.Action.CLONE;
-import static spinnery.widget.api.Action.PICKUP;
-import static spinnery.widget.api.Action.PICKUP_ALL;
-import static spinnery.widget.api.Action.QUICK_MOVE;
+import static spinnery.registry.NetworkRegistry.*;
+import static spinnery.util.MouseUtilities.*;
+import static spinnery.widget.api.Action.*;
 
 public class WSlot extends WAbstractWidget {
 	public static final int LEFT = 0;
@@ -52,10 +45,26 @@ public class WSlot extends WAbstractWidget {
 	protected List<Tag<Item>> acceptTags = new ArrayList<>();
 	protected List<Tag<Item>> denyTags = new ArrayList<>();
 
+	protected List<BiConsumer<Action, Action.Subtype>> consumers = new ArrayList<>();
+
+	public void consume(Action action, Action.Subtype subtype) {
+		consumers.forEach(actionConsumer -> actionConsumer.accept(action, subtype));
+	}
+
+	public <W extends WSlot> W addConsumer(BiConsumer<Action, Action.Subtype> consumer) {
+		consumers.add(consumer);
+		return (W) this;
+	}
+
+	public <W extends WSlot> W removeConsumer(BiConsumer<Action, Action.Subtype> consumer) {
+		consumers.remove(consumer);
+		return (W) this;
+	}
+
 	@Environment(EnvType.CLIENT)
 	public static Collection<WSlot> addPlayerInventory(Position position, Size size, WModifiableCollection parent) {
-		Collection<WSlot> set = addArray(position, size, parent, 9, BaseScreenHandler.PLAYER_INVENTORY, 9, 3);
-		set.addAll(addArray(position.add(0, size.getHeight() * 3 + 3, 0), size, parent, 0, BaseScreenHandler.PLAYER_INVENTORY, 9, 1));
+		Collection<WSlot> set = addArray(position, size, parent, 9, BaseContainer.PLAYER_INVENTORY, 9, 3);
+		set.addAll(addArray(position.add(0, size.getHeight() * 3 + 3, 0), size, parent, 0, BaseContainer.PLAYER_INVENTORY, 9, 1));
 		return set;
 	}
 
@@ -73,8 +82,8 @@ public class WSlot extends WAbstractWidget {
 	}
 
 	public static Collection<WSlot> addHeadlessPlayerInventory(WInterface linkedInterface) {
-		Collection<WSlot> set = addHeadlessArray(linkedInterface, 0, BaseScreenHandler.PLAYER_INVENTORY, 9, 1);
-		set.addAll(addHeadlessArray(linkedInterface, 9, BaseScreenHandler.PLAYER_INVENTORY, 9, 3));
+		Collection<WSlot> set = addHeadlessArray(linkedInterface, 0, BaseContainer.PLAYER_INVENTORY, 9, 1);
+		set.addAll(addHeadlessArray(linkedInterface, 9, BaseContainer.PLAYER_INVENTORY, 9, 3));
 		return set;
 	}
 
@@ -83,8 +92,8 @@ public class WSlot extends WAbstractWidget {
 		for (int y = 0; y < arrayHeight; ++y) {
 			for (int x = 0; x < arrayWidth; ++x) {
 				set.add(parent.createChild(WSlot::new)
-							.setSlotNumber(slotNumber + y * arrayWidth + x)
-							.setInventoryNumber(inventoryNumber));
+						.setSlotNumber(slotNumber + y * arrayWidth + x)
+						.setInventoryNumber(inventoryNumber));
 			}
 		}
 		return set;
@@ -161,24 +170,24 @@ public class WSlot extends WAbstractWidget {
 
 		BaseRenderer.drawBeveledPanel(x, y, z, sX, sY, getStyle().asColor("top_left"), getStyle().asColor("background.unfocused"), getStyle().asColor("bottom_right"));
 
-		if (isFocused()) {
-			BaseRenderer.drawRectangle(x + 1, y + 1, z, sX - 2, sY - 2, getStyle().asColor("background.focused"));
-		}
-
 		if (hasPreviewTexture()) {
 			BaseRenderer.drawImage(x + 1, y + 1, z, sX - 2, sY - 2, getPreviewTexture());
 		}
 
 		ItemStack stackA = getPreviewStack().isEmpty() ? getStack() : getPreviewStack();
 
+		RenderSystem.translatef(0, 0, +250);
+		RenderSystem.translatef(0, 0, -150);
 		RenderSystem.enableLighting();
-		BaseRenderer.getItemRenderer().renderGuiItem(stackA, 1 + x + (sX - 18) / 2, 1 + y + (sY - 18) / 2);
+		BaseRenderer.getItemRenderer().renderGuiItemIcon(stackA, 1 + x + (sX - 18) / 2, 1 + y + (sY - 18) / 2);
 		BaseRenderer.getItemRenderer().renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stackA, 1 + x + (sX - 18) / 2, 1 + y + (sY - 18) / 2, stackA.getCount() == 1 ? "" : withSuffix(stackA.getCount()));
 		RenderSystem.disableLighting();
+		RenderSystem.translatef(0, 0, +150);
 
 		if (isFocused()) {
-			BaseRenderer.drawRectangle(x + 1, y + 1, z + 300, sX - 2, sY - 2, getStyle().asColor("overlay"));
+			BaseRenderer.drawRectangle(x + 1, y + 1, z + 1, sX - 2, sY - 2, getStyle().asColor("overlay"));
 		}
+		RenderSystem.translatef(0, 0, -250);
 	}
 
 	@Override
@@ -187,7 +196,7 @@ public class WSlot extends WAbstractWidget {
 		if (button == MIDDLE || isLocked()) return;
 
 		PlayerEntity player = getInterface().getContainer().getPlayerInventory().player;
-		BaseScreenHandler container = getInterface().getContainer();
+		BaseContainer container = getInterface().getContainer();
 
 		int[] slotNumbers = container.getDragSlots(button).stream().mapToInt(WSlot::getSlotNumber).toArray();
 		int[] inventoryNumbers = container.getDragSlots(button).stream().mapToInt(WSlot::getInventoryNumber).toArray();
@@ -220,7 +229,7 @@ public class WSlot extends WAbstractWidget {
 		if (!isFocused() || isLocked()) return;
 
 		PlayerEntity player = getInterface().getContainer().getPlayerInventory().player;
-		BaseScreenHandler container = getInterface().getContainer();
+		BaseContainer container = getInterface().getContainer();
 
 		boolean isCursorEmpty = player.inventory.getCursorStack().isEmpty();
 
@@ -258,7 +267,7 @@ public class WSlot extends WAbstractWidget {
 		if (!isFocused() || button == MIDDLE || isLocked()) return;
 
 		PlayerEntity player = getInterface().getContainer().getPlayerInventory().player;
-		BaseScreenHandler container = getInterface().getContainer();
+		BaseContainer container = getInterface().getContainer();
 
 		boolean isCached = getInterface().getCachedWidgets().get(getClass()) == this;
 
@@ -338,7 +347,8 @@ public class WSlot extends WAbstractWidget {
 
 	public ItemStack getStack() {
 		try {
-			ItemStack stackA = getLinkedInventory().getInvStack(getSlotNumber());;
+			ItemStack stackA = getLinkedInventory().getInvStack(getSlotNumber());
+			;
 			if (!isOverrideMaximumCount()) {
 				setMaximumCount(stackA.getMaxCount());
 			}

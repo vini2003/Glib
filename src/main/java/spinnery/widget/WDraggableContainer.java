@@ -2,22 +2,11 @@ package spinnery.widget;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import org.lwjgl.opengl.GL11;
+import spinnery.client.BaseRenderer;
 import spinnery.util.MutablePair;
-import spinnery.widget.api.Size;
-import spinnery.widget.api.WDrawableCollection;
-import spinnery.widget.api.WHorizontalScrollable;
-import spinnery.widget.api.WLayoutElement;
-import spinnery.widget.api.WModifiableCollection;
-import spinnery.widget.api.WVerticalScrollable;
+import spinnery.widget.api.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Environment(EnvType.CLIENT)
 public class WDraggableContainer extends WAbstractWidget implements WDrawableCollection, WModifiableCollection, WVerticalScrollable, WHorizontalScrollable {
@@ -53,7 +42,9 @@ public class WDraggableContainer extends WAbstractWidget implements WDrawableCol
 			}
 		}
 		return Size.of(rightmostX - leftmostX, bottommostY - topmostY);
-	}	@Override
+	}
+
+	@Override
 	public int getStartAnchorX() {
 		return getX();
 	}
@@ -61,7 +52,9 @@ public class WDraggableContainer extends WAbstractWidget implements WDrawableCol
 	@Override
 	public Size getVisibleSize() {
 		return getSize();
-	}	@Override
+	}
+
+	@Override
 	public int getStartAnchorY() {
 		return getY();
 	}
@@ -134,22 +127,15 @@ public class WDraggableContainer extends WAbstractWidget implements WDrawableCol
 	public void draw() {
 		if (isHidden()) return;
 
-		int x = getX();
-		int y = getY();
-		int sX = getWidth();
-		int sY = getHeight();
+		BaseRenderer.enableCropping();
 
-		int rawHeight = MinecraftClient.getInstance().getWindow().getHeight();
-		double scale = MinecraftClient.getInstance().getWindow().getScaleFactor();
-
-		GL11.glEnable(GL11.GL_SCISSOR_TEST);
-		GL11.glScissor((int) (x * scale), (int) (rawHeight - (y * scale + sY * scale)), (int) (sX * scale), (int) (sY * scale));
+		BaseRenderer.crop(this);
 
 		for (WLayoutElement widget : getOrderedWidgets()) {
 			widget.draw();
 		}
 
-		GL11.glDisable(GL11.GL_SCISSOR_TEST);
+		BaseRenderer.disableCropping();
 	}
 
 	@Override

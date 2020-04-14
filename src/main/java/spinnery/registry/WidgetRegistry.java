@@ -5,6 +5,9 @@ import com.google.common.collect.HashBiMap;
 import net.minecraft.util.Identifier;
 import spinnery.widget.*;
 
+/**
+ * Registers all of Spinnery's widgets with Spinnery.
+ */
 public class WidgetRegistry {
 	private static BiMap<Identifier, Class<? extends WAbstractWidget>> widgetMap = HashBiMap.create();
 
@@ -48,6 +51,9 @@ public class WidgetRegistry {
 		register(new Identifier("spinnery", "text_area"), WTextArea.class);
 		register(new Identifier("spinnery", "text_field"), WTextField.class);
 		register(new Identifier("spinnery", "item"), WItem.class);
+		register(new Identifier("spinnery", "horizontal_box_container"), WHorizontalBoxContainer.class);
+		register(new Identifier("spinnery", "vertical_box_container"), WVerticalBoxContainer.class);
+		register(new Identifier("spinnery", "form_container"), WFormContainer.class);
 	}
 
 	public static void register(Identifier id, Class<? extends WAbstractWidget> wClass) {

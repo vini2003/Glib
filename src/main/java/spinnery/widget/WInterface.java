@@ -7,27 +7,15 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Window;
 import net.minecraft.util.Identifier;
 import spinnery.client.BaseRenderer;
-import spinnery.common.BaseScreenHandler;
+import spinnery.common.BaseContainer;
 import spinnery.registry.NetworkRegistry;
 import spinnery.util.EventUtilities;
-import spinnery.widget.api.Color;
-import spinnery.widget.api.WDrawableCollection;
-import spinnery.widget.api.WLayoutElement;
-import spinnery.widget.api.WModifiableCollection;
-import spinnery.widget.api.WNetworked;
-import spinnery.widget.api.WThemable;
+import spinnery.widget.api.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class WInterface implements WDrawableCollection, WModifiableCollection, WLayoutElement, WThemable {
-	protected BaseScreenHandler linkedContainer;
+	protected BaseContainer linkedContainer;
 	protected Set<WAbstractWidget> widgets = new LinkedHashSet<>();
 	protected List<WLayoutElement> orderedWidgets = new ArrayList<>();
 	protected Map<Class<? extends WAbstractWidget>, WAbstractWidget> cachedWidgets = new HashMap<>();
@@ -44,18 +32,18 @@ public class WInterface implements WDrawableCollection, WModifiableCollection, W
 		return (W) this;
 	}
 
-	public WInterface(BaseScreenHandler linkedContainer) {
+	public WInterface(BaseContainer linkedContainer) {
 		setContainer(linkedContainer);
 		if (getContainer().getWorld().isClient()) {
 			setClientside(true);
 		}
 	}
 
-	public BaseScreenHandler getContainer() {
+	public BaseContainer getContainer() {
 		return linkedContainer;
 	}
 
-	public <W extends WInterface> W setContainer(BaseScreenHandler linkedContainer) {
+	public <W extends WInterface> W setContainer(BaseContainer linkedContainer) {
 		this.linkedContainer = linkedContainer;
 		return (W) this;
 	}
@@ -131,7 +119,7 @@ public class WInterface implements WDrawableCollection, WModifiableCollection, W
 		}
 	}
 
-	public boolean onMouseReleased(int mouseX, int mouseY, int mouseButton) {
+	public void onMouseReleased(int mouseX, int mouseY, int mouseButton) {
 		for (WAbstractWidget widget : getWidgets()) {
 			if (!EventUtilities.canReceiveMouse(widget)) continue;
 			widget.onMouseReleased(mouseX, mouseY, mouseButton);
@@ -140,7 +128,6 @@ public class WInterface implements WDrawableCollection, WModifiableCollection, W
 						NetworkRegistry.createMouseReleasePacket(((WNetworked) widget), mouseX, mouseY, mouseButton));
 			}
 		}
-		return false;
 	}
 
 	public boolean onMouseDragged(int mouseX, int mouseY, int mouseButton, int deltaX, int deltaY) {

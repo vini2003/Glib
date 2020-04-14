@@ -1,18 +1,8 @@
 package spinnery.widget;
 
 import com.google.common.collect.ImmutableSet;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import net.minecraft.client.MinecraftClient;
-import org.lwjgl.opengl.GL11;
-import spinnery.util.MutablePair;
-import spinnery.widget.api.Position;
-import spinnery.widget.api.Size;
-import spinnery.widget.api.WDelegatedEventListener;
-import spinnery.widget.api.WDrawableCollection;
-import spinnery.widget.api.WEventListener;
-import spinnery.widget.api.WLayoutElement;
-import spinnery.widget.api.WModifiableCollection;
-import spinnery.widget.api.WVerticalScrollable;
+import spinnery.client.BaseRenderer;
+import spinnery.widget.api.*;
 
 import java.util.*;
 
@@ -190,8 +180,7 @@ public class WVerticalScrollableContainer extends WAbstractWidget implements WDr
 	public void updateChildren() {
 		for (WAbstractWidget w : getWidgets()) {
 			w.getPosition().setOffsetY(-yOffset);
-			boolean startContained = isWithinBounds(w.getX(), w.getY(), 1)
-					|| isWithinBounds(w.getX() + w.getWidth(), w.getY() + w.getHeight(), 1);
+			boolean startContained = isWithinBounds(w.getX(), w.getY(), 1) || isWithinBounds(w.getX() + w.getWidth(), w.getY() + w.getHeight(), 1);
 			w.setHidden(!startContained);
 		}
 	}
@@ -236,31 +225,21 @@ public class WVerticalScrollableContainer extends WAbstractWidget implements WDr
 			return;
 		}
 
-		int x = getX();
-		int y = getY();
-
-		int sX = getWidth();
-		int sY = getHeight();
-
-		int rawHeight = MinecraftClient.getInstance().getWindow().getHeight();
-		double scale = MinecraftClient.getInstance().getWindow().getScaleFactor();
-
-		GL11.glEnable(GL11.GL_SCISSOR_TEST);
-
-		GL11.glScissor((int) (x * scale), (int) (rawHeight - (y * scale + sY * scale)), (int) (sX * scale), (int) (sY * scale));
+		BaseRenderer.enableCropping();
 
 		for (WAbstractWidget widget : getWidgets()) {
+			BaseRenderer.crop(this);
 			widget.draw();
 		}
 
-		GL11.glDisable(GL11.GL_SCISSOR_TEST);
+		BaseRenderer.disableCropping();
 
 		scrollbar.draw();
 	}
 
 	@Override
-	public boolean updateFocus(int mouseX, int mouseY) {
-		setFocus(isWithinBounds(mouseX, mouseY) && getWidgets().stream().noneMatch((WAbstractWidget::isFocused)));
+	public boolean updateFocus(int positionX, int positionY) {
+		setFocus(isWithinBounds(positionX, positionY) && getWidgets().stream().noneMatch((WAbstractWidget::isFocused)));
 		return isFocused();
 	}
 
