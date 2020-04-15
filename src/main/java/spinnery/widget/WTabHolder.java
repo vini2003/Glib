@@ -30,6 +30,7 @@ public class WTabHolder extends WAbstractWidget implements WCollection, WDelegat
 		WTab tab = new WTab()
 				.setSymbol(symbol).setName(name).setNumber(tabNumber)
 				.setParent(this).setInterface(getInterface());
+		tab.setActive(tabNumber == 1);
 		tabs.add(tab);
 		updateTabs();
 		return tab;
