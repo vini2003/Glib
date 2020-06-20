@@ -636,7 +636,8 @@ public abstract class WAbstractWidget implements Tickable, WLayoutElement, WThem
 	 */
 	@Environment(EnvType.CLIENT)
 	public boolean updateFocus(float positionX, float positionY) {
-		if (isHidden()) {
+		if (isRecursivelyHidden()) {
+			setFocus(false);
 			return false;
 		}
 
@@ -652,6 +653,23 @@ public abstract class WAbstractWidget implements Tickable, WLayoutElement, WThem
 	@Environment(EnvType.CLIENT)
 	public boolean isHidden() {
 		return isHidden;
+	}
+
+	/**
+	 * Asserts whether this widget or any of its ancestors are hidden.
+	 *
+	 * @return True if hidden; False if not.
+	 */
+	@Environment(EnvType.CLIENT)
+	public boolean isRecursivelyHidden() {
+		if (isHidden) {
+			return true;
+		}
+		WLayoutElement parent = getParent();
+		if (parent instanceof WAbstractWidget) {
+			return ((WAbstractWidget)parent).isRecursivelyHidden();
+		}
+		return false;
 	}
 
 	/**

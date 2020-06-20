@@ -16,7 +16,7 @@ public class EventUtilities {
 	public static <T extends WEventListener> boolean canReceiveMouse(T target) {
 		if (target instanceof WAbstractWidget) {
 			WAbstractWidget widget = (WAbstractWidget) target;
-			return !(widget.isFocusedMouseListener() || target.getClass().isAnnotationPresent(WFocusedMouseListener.class)) || widget.isFocused();
+			return (!(widget.isFocusedMouseListener() || target.getClass().isAnnotationPresent(WFocusedMouseListener.class)) || widget.isFocused()) && !widget.isRecursivelyHidden();
 		}
 		return true;
 	}
@@ -31,7 +31,7 @@ public class EventUtilities {
 	public static <T extends WEventListener> boolean canReceiveKeyboard(T target) {
 		if (target instanceof WAbstractWidget) {
 			WAbstractWidget widget = (WAbstractWidget) target;
-			return !(widget.isFocusedKeyboardListener() || target.getClass().isAnnotationPresent(WFocusedKeyboardListener.class)) || widget.isFocused();
+			return (!(widget.isFocusedKeyboardListener() || target.getClass().isAnnotationPresent(WFocusedKeyboardListener.class)) || widget.isFocused()) && !widget.isRecursivelyHidden();
 		}
 		return true;
 	}
