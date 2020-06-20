@@ -14,18 +14,18 @@ public class WStatusBar extends WAbstractWidget {
     /**
      * The normal health bar without any status modifiers.
      */
-    public static final BarConfig HEALTH_DEFAULT = new BarConfig(ICONS.getSprite(0), ICONS.getSprite(4), ICONS.getSprite(5), BarConfig.Direction.LeftToRight);
-    public static final BarConfig HEALTH_WITHER = new BarConfig(ICONS.getSprite(0), ICONS.getSprite(12), ICONS.getSprite(13), BarConfig.Direction.LeftToRight);
-    public static final BarConfig HEALTH_POISON = new BarConfig(ICONS.getSprite(0), ICONS.getSprite(8), ICONS.getSprite(9), BarConfig.Direction.LeftToRight);
+    public static final BarConfig HEALTH_DEFAULT = new BarConfig(ICONS.getSprite(0), ICONS.getSprite(4), ICONS.getSprite(5), BarConfig.Direction.LEFT_TO_RIGHT);
+    public static final BarConfig HEALTH_WITHER = new BarConfig(ICONS.getSprite(0), ICONS.getSprite(12), ICONS.getSprite(13), BarConfig.Direction.LEFT_TO_RIGHT);
+    public static final BarConfig HEALTH_POISON = new BarConfig(ICONS.getSprite(0), ICONS.getSprite(8), ICONS.getSprite(9), BarConfig.Direction.LEFT_TO_RIGHT);
     /**
      * The normal food bar. Note that this is a right to left bar by default. You can mirror it using {@link BarConfig#mirror()}.
      */
-    public static final BarConfig FOOD_DEFAULT = new BarConfig(ICONS.getSprite(54), ICONS.getSprite(58), ICONS.getSprite(59), BarConfig.Direction.RightToLeft);
+    public static final BarConfig FOOD_DEFAULT = new BarConfig(ICONS.getSprite(54), ICONS.getSprite(58), ICONS.getSprite(59), BarConfig.Direction.RIGHT_TO_LEFT);
     /**
      * Food bar with the hunger status effect.
      */
-    public static final BarConfig FOOD_HUNGER = new BarConfig(ICONS.getSprite(56), ICONS.getSprite(62), ICONS.getSprite(63), BarConfig.Direction.RightToLeft);
-    public static final BarConfig ARMOR_DEFAULT = new BarConfig(ICONS.getSprite(18), ICONS.getSprite(20), ICONS.getSprite(19), BarConfig.Direction.LeftToRight);
+    public static final BarConfig FOOD_HUNGER = new BarConfig(ICONS.getSprite(56), ICONS.getSprite(62), ICONS.getSprite(63), BarConfig.Direction.RIGHT_TO_LEFT);
+    public static final BarConfig ARMOR_DEFAULT = new BarConfig(ICONS.getSprite(18), ICONS.getSprite(20), ICONS.getSprite(19), BarConfig.Direction.LEFT_TO_RIGHT);
 
     public static class BarConfig {
         // Always renders, even behind full sprites.
@@ -41,8 +41,8 @@ public class WStatusBar extends WAbstractWidget {
         public final int spriteHeight;
 
         public enum Direction {
-            LeftToRight,
-            RightToLeft,
+            LEFT_TO_RIGHT,
+            RIGHT_TO_LEFT,
         }
 
         public BarConfig(SpriteSheet.Sprite background, SpriteSheet.Sprite full, SpriteSheet.Sprite half, Direction direction) {
@@ -116,7 +116,7 @@ public class WStatusBar extends WAbstractWidget {
 
         int numContainers = (maxValue + 1) / 2;
         for (int i = 0; i < numContainers; i++) {
-            boolean flip = config.direction == BarConfig.Direction.RightToLeft;
+            boolean flip = config.direction == BarConfig.Direction.RIGHT_TO_LEFT;
             if (config.mirror) {
                 flip = !flip;
             }
