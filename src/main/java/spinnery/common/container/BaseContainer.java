@@ -43,8 +43,8 @@ public class BaseContainer extends Container {
 	protected final WInterface serverInterface;
 	public Map<Integer, Inventory> inventories = new HashMap<>();
 	public Map<Integer, Map<Integer, ItemStack>> cachedInventories = new HashMap<>();
-	protected Set<WSlot> splitSlots = new HashSet<>();
-	protected Set<WSlot> singleSlots = new HashSet<>();
+	protected Set<WSlot> splitSlots = new LinkedHashSet<>();
+	protected Set<WSlot> singleSlots = new LinkedHashSet<>();
 	protected Map<Integer, Map<Integer, ItemStack>> previewStacks = new HashMap<>();
 	protected ItemStack previewCursorStack = ItemStack.EMPTY;
 	protected World world;
@@ -187,13 +187,13 @@ public class BaseContainer extends Container {
 	 * @param action          Action which was performed.
 	 */
 	public void onSlotDrag(int[] slotNumber, int[] inventoryNumber, Action action) {
-		HashMap<Integer, WSlot> slots = new HashMap<>();
+		Set<WSlot> slots = new LinkedHashSet<>();
 
 		for (int i = 0; i < slotNumber.length; ++i) {
-			WSlot slot = getInterface().getSlot(inventoryNumber[0], slotNumber[0]);
+			WSlot slot = getInterface().getSlot(inventoryNumber[i], slotNumber[i]);
 
 			if (slot != null) {
-				slots.put(i, slot);
+				slots.add(slot);
 			}
 		}
 
@@ -204,7 +204,7 @@ public class BaseContainer extends Container {
 		int split;
 
 		if (action.isSplit()) {
-			split = getPlayerInventory().getCursorStack().getCount() / slots.size();
+			split = Math.max(getPlayerInventory().getCursorStack().getCount() / slots.size(), 1);
 		} else {
 			split = 1;
 		}
@@ -221,10 +221,7 @@ public class BaseContainer extends Container {
 			return;
 		}
 
-
-		for (Integer number : slots.keySet()) {
-			WSlot slotA = slots.get(number);
-
+		for (WSlot slotA : slots) {
 			if (slotA.refuses(stackA)) continue;
 
 			ItemStack stackB;
@@ -238,11 +235,11 @@ public class BaseContainer extends Container {
 			MutablePair<ItemStack, ItemStack> stacks = StackUtilities.merge(stackA, stackB, split, Math.min(stackA.getMaxCount(), split));
 
 			if (action.isPreview()) {
-				slotA.getInterface().getContainer().previewCursorStack = stacks.getFirst().copy();
+				this.previewCursorStack = stacks.getFirst().copy();
 				slotA.setPreviewStack(stacks.getSecond().copy());
 			} else {
 				stackA = stacks.getFirst();
-				slotA.getInterface().getContainer().previewCursorStack = ItemStack.EMPTY;
+				this.previewCursorStack = ItemStack.EMPTY;
 				slotA.setStack(stacks.getSecond());
 			}
 		}
@@ -301,12 +298,14 @@ public class BaseContainer extends Container {
 								StackUtilities.merge(stackA, stackB, stackA.isEmpty() || slotA.getInventoryNumber() == PLAYER_INVENTORY ? stackB.getMaxCount() : slotA.getMaxCount(), stackB.getMaxCount()).apply(slotA::acceptStack, inventory::setCursorStack);
 							}
 						}
-					} else if (button == 1 && !stackB.isEmpty()) { // Interact with existing // RMB
-						slotA.consume(action, Action.Subtype.FROM_CURSOR_TO_SLOT_CUSTOM_SINGLE_ITEM);
-						StackUtilities.merge(inventory::getCursorStack, slotA::getStack, inventory.getCursorStack()::getMaxCount, () -> (slotA.getStack().getCount() == slotA.getMaxCount() ? 0 : slotA.getStack().getCount() + 1)).apply(inventory::setCursorStack, slotA::setStack);
-					} else if (button == 1) { // Split existing // RMB
-						slotA.consume(action, Action.Subtype.FROM_SLOT_TO_CURSOR_DEFAULT_HALF_STACK);
-						StackUtilities.merge(slotA::getStack, inventory::getCursorStack, inventory.getCursorStack()::getMaxCount, () -> Math.max(1, Math.min(slotA.getStack().getMaxCount() / 2, slotA.getStack().getCount() / 2))).apply(slotA::setStack, inventory::setCursorStack);
+					} else if (button == 1) {
+						if (!stackB.isEmpty()) { // Interact with existing // RMB
+							slotA.consume(action, Action.Subtype.FROM_CURSOR_TO_SLOT_CUSTOM_SINGLE_ITEM);
+							StackUtilities.merge(player.inventory::getCursorStack, slotA::getStack, player.inventory.getCursorStack()::getMaxCount, () -> (slotA.getStack().getCount() + slotA.getStack().getCount() == slotA.getMaxCount() ? 0 : 1)).apply(player.inventory::setCursorStack, slotA::setStack);
+						} else { // Split existing // RMB
+							slotA.consume(action, Action.Subtype.FROM_SLOT_TO_CURSOR_DEFAULT_HALF_STACK);
+							StackUtilities.merge(slotA::getStack, inventory::getCursorStack, inventory.getCursorStack()::getMaxCount, () -> Math.max(1, Math.min(slotA.getStack().getMaxCount() / 2, slotA.getStack().getCount() / 2))).apply(slotA::setStack, inventory::setCursorStack);
+						}
 					}
 				} else {
 					if (button == 0) {

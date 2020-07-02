@@ -75,6 +75,8 @@ public class StackUtilities {
 				stackB.setCount(Math.min(countA, availableB));
 				stackB.setTag(stackA.getTag());
 				stackA.decrement(Math.min(countA, availableB));
+			} else {
+				return MutablePair.of(stackB, stackA);
 			}
 		}
 

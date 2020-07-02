@@ -211,9 +211,7 @@ public class WSlot extends WAbstractWidget {
 			if (isDragging) {
 				container.onSlotDrag(slotNumbers, inventoryNumbers, Action.of(button, true));
 				INSTANCE.sendToServer(SLOT_DRAG_PACKET, createSlotDragPacket(container.syncId, slotNumbers, inventoryNumbers, Action.of(button, true)));
-			} else if (!isFocused()) {
-				return;
-			} else if ((button == LEFT || button == RIGHT) && !isCursorEmpty) {
+			} else if ((button == LEFT || button == RIGHT) && !isCursorEmpty && isFocused()) {
 				container.onSlotAction(slotNumber, inventoryNumber, button, PICKUP, player);
 				INSTANCE.sendToServer(SLOT_CLICK_PACKET, createSlotClickPacket(container.syncId, slotNumber, inventoryNumber, button, PICKUP));
 			}
