@@ -1,6 +1,10 @@
 package spinnery.client.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
+import net.fabricmc.fabric.impl.client.indigo.renderer.accessor.AccessItemRenderer;
+import net.fabricmc.fabric.impl.client.indigo.renderer.render.IndigoQuadHandler;
+import net.fabricmc.fabric.impl.client.indigo.renderer.render.ItemRenderContext;
 import net.minecraft.block.Block;
 import net.minecraft.block.StainedGlassPaneBlock;
 import net.minecraft.block.TransparentBlock;
@@ -38,6 +42,8 @@ public class AdvancedItemRenderer implements SynchronousResourceReloadListener {
 	private ItemModels models;
 	private TextureManager textureManager;
 	private ItemColors colorMap;
+	private final ItemRenderContext.VanillaQuadHandler vanillaHandler = new IndigoQuadHandler((AccessItemRenderer) BaseRenderer.getDefaultItemRenderer());
+	private final ThreadLocal<ItemRenderContext> CONTEXTS = ThreadLocal.withInitial(() -> new ItemRenderContext(colorMap));
 
 	private static final Random random = new Random(42L);
 
@@ -196,7 +202,12 @@ public class AdvancedItemRenderer implements SynchronousResourceReloadListener {
 	public void renderItem(MatrixStack matrices, VertexConsumerProvider provider, LivingEntity entity, ItemStack item, ModelTransformation.Mode renderMode, boolean leftHanded, World world, int light, int overlay) {
 		if (!item.isEmpty()) {
 			BakedModel bakedModel = this.getHeldItemModel(item, world, entity);
-			this.renderItem(matrices, provider, item, renderMode, leftHanded, light, overlay, bakedModel);
+			FabricBakedModel fabricBakedModel = (FabricBakedModel)bakedModel;
+			if(!(item.isEmpty() || fabricBakedModel.isVanillaAdapter())) {
+				CONTEXTS.get().renderModel(item, renderMode, false, matrices, provider, light, overlay, fabricBakedModel, vanillaHandler);
+			} else {
+				this.renderItem(matrices, provider, item, renderMode, leftHanded, light, overlay, bakedModel);
+			}
 		}
 	}
 
@@ -221,8 +232,12 @@ public class AdvancedItemRenderer implements SynchronousResourceReloadListener {
 		if (isSideNotLit) {
 			DiffuseLighting.disableGuiDepthLighting();
 		}
-
-		this.renderItem(matrices, provider, stack, ModelTransformation.Mode.GUI, false, 0x00f000f0, OverlayTexture.DEFAULT_UV, model);
+		FabricBakedModel fabricBakedModel = (FabricBakedModel) model;
+		if(!(stack.isEmpty() || fabricBakedModel.isVanillaAdapter())) {
+			CONTEXTS.get().renderModel(stack, ModelTransformation.Mode.GUI, false, matrices, provider, 0x00f000f0, OverlayTexture.DEFAULT_UV, fabricBakedModel, vanillaHandler);
+		} else {
+			this.renderItem(matrices, provider, stack, ModelTransformation.Mode.GUI, false, 0x00f000f0, OverlayTexture.DEFAULT_UV, model);
+		}
 
 		if (isSideNotLit) {
 			DiffuseLighting.enableGuiDepthLighting();
